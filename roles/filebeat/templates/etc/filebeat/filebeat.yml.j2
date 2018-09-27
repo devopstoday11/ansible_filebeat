@@ -1,0 +1,206 @@
+# {{ ansible_managed }}
+
+###################### Filebeat Configuration Example #########################
+
+# This file is an example configuration file highlighting only the most common
+# options. The filebeat.reference.yml file from the same directory contains all the
+# supported options with more comments. You can use it as a reference.
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/filebeat/index.html
+
+# For more available modules and options, please see the filebeat.reference.yml sample
+# configuration file.
+
+#=========================== Filebeat inputs =============================
+
+# For input configurations, you specify the path option in the
+# filebeat.config.inputs section of the filebeat.yml file.
+# Each file found by the path Glob must contain a list of one
+# or more input definitions.
+filebeat.config.inputs:
+
+  # Set to true to enable config
+  enabled: {{ filebeat_config_inputs.enabled }}
+
+  # A Glob that defines the files to check for changes.
+  path: {{ filebeat_config_inputs.path }}
+
+  # Set to true to enable config reloading
+  reload.enabled: {{ filebeat_config_inputs.reload_enabled }}
+
+  # Period on which files under path should be checked for changes
+  reload.period: {{ filebeat_config_inputs.reload_period }}
+
+#============================= Filebeat modules ===============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: {{ filebeat_config_modules.path }}
+
+  # Set to true to enable config reloading
+  reload.enabled: {{ filebeat_config_modules.reload_enabled }}
+
+  # Period on which files under path should be checked for changes
+  reload.period: {{ filebeat_config_modules.reload_period }}
+
+#==================== Elasticsearch template setting ==========================
+
+setup.template.settings:
+  index.number_of_shards: {{ filebeat_setup_template_settings.index.number_of_shards }}
+  index.codec: {{ filebeat_setup_template_settings.index.codec }}
+  _source.enabled: {{ filebeat_setup_template_settings.index.source_enabled }}
+
+#================================ General =====================================
+
+# The name of the shipper that publishes the network data. It can be used to group
+# all the transactions sent by a single shipper in the web interface.
+name: {{ filebeat_name }}
+
+# The tags of the shipper are included in their own field with each
+# transaction published.
+tags: {{ filebeat_tags | to_json }}
+
+# Optional fields that you can specify to add additional information to the
+# output.
+fields:
+{% for key, value in filebeat_fields.iteritems() %}
+  {{ key }}: "{{ value }}"
+{% endfor %}
+
+{% if filebeat_setup_dashboard.enabled != "" %}
+#============================== Dashboards =====================================
+# These settings control loading the sample dashboards to the Kibana index. Loading
+# the dashboards is disabled by default and can be enabled either by setting the
+# options here, or by using the `-setup` CLI flag or the `setup` command.
+setup.dashboards.enabled: {{ filebeat_setup_dashboard.enabled }}
+
+# The URL from where to download the dashboards archive. By default this URL
+# has a value which is computed based on the Beat name and version. For released
+# versions, this URL points to the dashboard archive on the artifacts.elastic.co
+# website.
+setup.dashboards.url: {{ filebeat_setup_dashboard.url }}
+{% endif %}
+
+{% if filebeat_setup_kibana.host != "" %}
+#============================== Kibana =====================================
+
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
+setup.kibana:
+
+  # Kibana Host
+  # Scheme and port can be left out and will be set to the default (http and 5601)
+  # In case you specify and additional path, the scheme is required: http://localhost:5601/path
+  # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
+  #host: "localhost:5601"
+  host: "{{ filebeat_setup_kibana.host }}"
+{% endif %}
+
+#============================= Elastic Cloud ==================================
+
+# These settings simplify using filebeat with the Elastic Cloud (https://cloud.elastic.co/).
+
+# The cloud.id setting overwrites the `output.elasticsearch.hosts` and
+# `setup.kibana.host` options.
+# You can find the `cloud.id` in the Elastic Cloud web UI.
+#cloud.id:
+
+# The cloud.auth setting overwrites the `output.elasticsearch.username` and
+# `output.elasticsearch.password` settings. The format is `<user>:<pass>`.
+#cloud.auth:
+
+#================================ Outputs =====================================
+
+# Configure what output to use when sending the data collected by the beat.
+
+{% if filebeat_output.elasticsearch.hosts != "" %}
+#-------------------------- Elasticsearch output ------------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: {{ filebeat_output.elasticsearch.hosts | to_json }}
+
+  # The loadbalance option is available for Redis, Logstash, and Elasticsearch
+  # outputs. The Kafka output handles load balancing internally.
+  loadbalance: {{ filebeat_output.elasticsearch.loadbalance }}
+
+  # The load balancer also supports multiple workers per host. The default is
+  # worker: 1. If you increase the number of workers, additional network
+  # connections will be used. The total number of workers participating in
+  # load balancing is number of hosts * workers.
+  sworker: {{ filebeat_output.elasticsearch.worker }}
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+{% endif %}
+{% if filebeat_output.logstash.hosts != "" %}
+#----------------------------- Logstash output --------------------------------
+output.logstash:
+  # The Logstash hosts
+  hosts: {{ filebeat_output.logstash.hosts | to_json }}
+
+  # The loadbalance option is available for Redis, Logstash, and Elasticsearch
+  # outputs. The Kafka output handles load balancing internally.
+  loadbalance: {{ filebeat_output.logstash.loadbalance }}
+
+  # The load balancer also supports multiple workers per host. The default is
+  # worker: 1. If you increase the number of workers, additional network
+  # connections will be used. The total number of workers participating in
+  # load balancing is number of hosts * workers.
+  sworker: {{ filebeat_output.logstash.worker }}
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+
+  # Certificate for SSL client authentication
+  #ssl.certificate: "/etc/pki/client/cert.pem"
+
+  # Client Certificate Key
+  #ssl.key: "/etc/pki/client/cert.key"
+{% endif %}
+
+{% if filebeat_logging.level != "" %}
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: error, warning, info, debug
+logging.level: {{ filebeat_logging.level }}
+
+{% if filebeat_logging.logging_to_file != "false" %}
+# When true, writes all logging output to files. The log files are
+# automatically rotated when the log file size limit is reached.
+logging.to_files: {{ filebeat_logging.logging_to_file }}
+logging.files:
+  path: {{ filebeat_logging.logging_files.path }}
+  name: {{ filebeat_logging.logging_files.name }}
+  keepfiles: {{ filebeat_logging.logging_files.keepfiles }}
+  permissions: {{ filebeat_logging.logging_files.permissions }}
+{% endif %}
+
+{% if filebeat_logging.logging_to_syslog != "false" %}
+# When true, writes all logging output to the syslog.
+logging.to_syslog: {{ filebeat_logging.logging_to_syslog }}
+{% endif %}
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+logging.selectors: {{ filebeat_logging.selectors | to_json }}
+{% endif %}
+
+#============================== Xpack Monitoring ===============================
+# filebeat can export internal metrics to a central Elasticsearch monitoring
+# cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
+# reporting is disabled by default.
+
+# Set to true to enable the monitoring reporter.
+#xpack.monitoring.enabled: false
+
+# Uncomment to send the metrics to Elasticsearch. Most settings from the
+# Elasticsearch output are accepted here as well. Any setting that is not set is
+# automatically inherited from the Elasticsearch output configuration, so if you
+# have the Elasticsearch output configured, you can simply uncomment the
+# following line.
+#xpack.monitoring.elasticsearch:

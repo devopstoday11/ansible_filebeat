@@ -1,0 +1,43 @@
+---
+
+- name: FILEBEAT | Manage Debian environment
+  import_tasks: debian.yml
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'Ubuntu'
+
+- name: FILEBEAT | Manage Redhat environment
+  import_tasks: redhat.yml
+  when: ansible_os_family == 'RedHat' or ansible_os_family == 'CentOS'
+
+- name: FILEBEAT | Installation
+  package:
+    name: "filebeat={{ filebeat_version }}*"
+    update_cache: yes
+    state: present
+  notify: Restart filebeat
+  tags: update-filebeat
+
+- name: FILEBEAT | Configuration
+  template:
+    src: etc/filebeat/filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart filebeat
+  tags:
+    - update-filebeat
+    - update-filebeat-config
+
+- name: FILEBEAT | Manage inputs
+  import_tasks: inputs.yml
+  when: filebeat_inputs is defined and filebeat_inputs != ""
+  tags:
+    - update-filebeat
+    - update-filebeat-inputs
+
+- name: FILEBEAT | Manage modules
+  import_tasks: modules.yml
+  when: filebeat_modules is defined and filebeat_modules != ""
+  tags:
+    - update-filebeat
+    - update-filebeat-modules

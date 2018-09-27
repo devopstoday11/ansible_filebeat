@@ -1,0 +1,19 @@
+---
+
+- name: FILEBEAT ON DEBIAN | Install prerequisites
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-software-properties
+    - apt-transport-https
+
+- name: FILEBEAT ON DEBIAN | Import key
+  apt_key:
+    url: "{{ filebeat_apt_key }}"
+    state: present
+
+- name: FILEBEAT ON DEBIAN | Add repository
+  apt_repository:
+    repo: "{{ filebeat_apt_repository }}"
+    state: present

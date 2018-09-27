@@ -1,0 +1,18 @@
+---
+
+- name: FILEBEAT MODULES | Create directory
+  file:
+    state: directory
+    path: "{{ filebeat_config_modules.path }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: FILEBEAT MODULES | Template modules
+  template:
+    src: opt/filebeat/modules/module.yml.j2
+    dest: "{{ filebeat_config_modules.path }}/module.yml"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ filebeat_modules }}"

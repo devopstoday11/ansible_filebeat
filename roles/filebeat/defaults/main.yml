@@ -1,0 +1,95 @@
+---
+
+###
+# FILEBEAT
+###
+
+# Version
+filebeat_version: 6.4.1
+
+# Debian
+filebeat_apt_key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+filebeat_apt_repository: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
+
+# RedHat
+filebeat_yum_key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+filebeat_yum_repository: https://artifacts.elastic.co/packages/6.x/yum
+
+# Input config files path
+filebeat_config_inputs:
+  path: /opt/filebeat/inputs/*.yml
+  enabled: "true"
+  reload_enabled: "true"
+  reload_period: 10s
+
+# Modules config files path
+filebeat_config_modules:
+  path: /opt/filebeat/modules/*.yml
+  reload_enabled: "true"
+  reload_period: 10s
+
+# Elasticsearch template setting
+filebeat_setup_template_settings:
+  index:
+    number_of_shards: 3
+    codec: best_compression
+    source_enabled: "true"
+
+# General
+filebeat_name: "{{ ansible_hostname }}"
+filebeat_tags: [] # Example: ["service-X", "web-tier"]
+filebeat_fields:
+  env: poc
+
+# Kibana Dashboard
+filebeat_setup_dashboard:
+  enabled: "" # Example: "true"
+  url: "" # Example : localhost:5601
+
+# Kibana
+filebeat_setup_kibana:
+  host: "" # Example : localhost:5601
+
+# Output
+filebeat_output:
+
+  # Elasticsearch
+  elasticsearch:
+    hosts: "" # Example: ["localhost:9200"]
+    loadbalance: "false"
+    worker: 1
+
+  # Logstash
+  logstash:
+    hosts:
+      - localhost:5044
+    loadbalance: "false"
+    worker: 1
+
+# Logging
+filebeat_logging:
+  level: "warning" # Example: debug
+
+  # To log file
+  logging_to_file: "true"
+  logging_files:
+    path: /var/log/filebeat
+    name: filebeat
+    keepfiles: 7
+    permissions: 0644
+
+  # To syslog
+  logging_to_syslog: "false"
+
+  # Selectors
+  selectors:
+    - "*"
+
+# Inputs
+filebeat_inputs:
+  - type: log
+    enabled: false
+    paths:
+      - "/var/log/*.log"
+# Inputs
+filebeat_modules: ""

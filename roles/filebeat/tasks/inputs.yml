@@ -1,0 +1,19 @@
+---
+
+- name: FILEBEAT INPUTS | Create directory
+  file:
+    state: directory
+    path: "{{ filebeat_config_inputs.path }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: FILEBEAT INPUTS | Template inputs
+  template:
+    src: opt/filebeat/inputs/input.yml.j2
+    dest: "{{ filebeat_config_inputs.path }}/input.yml"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ filebeat_inputs }}"
+  notify: Restart filebeat
