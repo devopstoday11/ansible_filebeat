@@ -5,7 +5,7 @@
 ###
 
 # Version
-filebeat_version: 6.4.1
+filebeat_version: 6.5.1
 
 # Debian
 filebeat_apt_key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
