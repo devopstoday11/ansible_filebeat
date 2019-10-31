@@ -8,14 +8,6 @@
   import_tasks: redhat.yml
   when: ansible_os_family == 'RedHat' or ansible_os_family == 'CentOS'
 
-- name: FILEBEAT | Installation
-  package:
-    name: "filebeat={{ filebeat_version }}*"
-    update_cache: yes
-    state: present
-  notify: Restart filebeat
-  tags: update-filebeat
-
 - name: FILEBEAT | Configuration
   template:
     src: etc/filebeat/filebeat.yml.j2

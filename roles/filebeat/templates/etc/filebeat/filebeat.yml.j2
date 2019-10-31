@@ -64,7 +64,7 @@ tags: {{ filebeat_tags | to_json }}
 # Optional fields that you can specify to add additional information to the
 # output.
 fields:
-{% for key, value in filebeat_fields.iteritems() %}
+{% for key, value in filebeat_fields.items() %}
   {{ key }}: "{{ value }}"
 {% endfor %}
 

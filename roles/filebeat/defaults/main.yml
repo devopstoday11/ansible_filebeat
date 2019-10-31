@@ -5,15 +5,16 @@
 ###
 
 # Version
-filebeat_version: 6.5.1
+filebeat_major_version: "7.x"
+filebeat_version: 7.4.1
 
 # Debian
 filebeat_apt_key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-filebeat_apt_repository: "deb https://artifacts.elastic.co/packages/6.x/apt stable main"
+filebeat_apt_repository: "deb https://artifacts.elastic.co/packages/{{ filebeat_major_version }}/apt stable main"
 
 # RedHat
 filebeat_yum_key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-filebeat_yum_repository: https://artifacts.elastic.co/packages/6.x/yum
+filebeat_yum_repository: https://artifacts.elastic.co/packages/{{ filebeat_major_version }}/yum
 
 # Input config files path
 filebeat_config_inputs:
